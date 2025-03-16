@@ -4,11 +4,6 @@ from src.utils import DB_PATH, SCHEMA_PATH
 def create_db():
    
 
-    #chemin relatif vers la base de données et le schema
-    DB_PATH 
-    SCHEMA_PATH
-    
-
     #connexion à la base de données
     connexion = sqlite3.connect(DB_PATH)
     cursor = connexion.cursor()
