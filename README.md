@@ -124,9 +124,9 @@ python -m src.etl.etl_pipeline --source all
   - `/processed/pole_emploi/` - Données transformées de Pôle Emploi
 
 ### RDS PostgreSQL
-- Endpoint: datawarehouses.c32ygg4oyapa.eu-north-1.rds.amazonaws.com
-- Port: 5432
-- Database: datawarehouses
+- Endpoint: [défini dans .env]
+- Port: [défini dans .env]
+- Database: [défini dans .env]
 - Tables:
   - `jobs` - Offres d'emploi
   - `skills` - Compétences extraites

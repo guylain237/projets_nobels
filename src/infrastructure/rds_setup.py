@@ -29,11 +29,11 @@ def get_rds_connection():
     """
     try:
         # Récupérer les paramètres de connexion
-        host = os.getenv('RDS_HOST', 'datawarehouses.c32ygg4oyapa.eu-north-1.rds.amazonaws.com')
-        port = os.getenv('RDS_PORT', '5432')
-        dbname = os.getenv('RDS_DBNAME', 'datawarehouses')
-        user = os.getenv('RDS_USER', 'admin')
-        password = os.getenv('RDS_PASSWORD', 'm!wgz#$gsPD}d7x')
+        host = os.getenv('DB_HOST')
+        port = os.getenv('DB_PORT', '5432')
+        dbname = os.getenv('DB_NAME')
+        user = os.getenv('DB_USER')
+        password = os.getenv('DB_PASSWORD')
         
         # Établir la connexion
         connection = psycopg2.connect(
