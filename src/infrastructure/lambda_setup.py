@@ -189,7 +189,7 @@ def setup_lambda_for_scraper():
     source_dir = 'src/data_collection/scrapers'
     output_path = 'deployment/welcome_jungle_lambda.zip'
     handler = 'welcome_jungle_improved.lambda_handler'
-    role_arn = os.getenv('LAMBDA_ROLE_ARN', 'arn:aws:iam::194722407093:role/lambda-execution-role')
+    role_arn = os.getenv('LAMBDA_ROLE_ARN')
     
     # Créer le package de déploiement
     if not create_lambda_deployment_package(source_dir, output_path):
