@@ -30,14 +30,10 @@ logger = logging.getLogger(__name__)
 def parse_arguments():
     """Parse les arguments de ligne de commande."""
     parser = argparse.ArgumentParser(description='Test de connexion RDS PostgreSQL')
-    parser.add_argument('--host', type=str, default='datawarehouses.c32ygg4oyapa.eu-north-1.rds.amazonaws.com',
-                        help='Hôte de la base de données')
-    parser.add_argument('--port', type=int, default=5432,
-                        help='Port de la base de données')
-    parser.add_argument('--dbname', type=str, default='datawarehouses',
-                        help='Nom de la base de données')
-    parser.add_argument('--user', type=str, default='admin',
-                        help='Utilisateur de la base de données')
+    parser.add_argument('--host', type=str, help='Hôte de la base de données')
+    parser.add_argument('--port', type=int, default=5432, help='Port de la base de données')
+    parser.add_argument('--dbname', type=str, help='Nom de la base de données')
+    parser.add_argument('--user', type=str, help='Utilisateur de la base de données')
     parser.add_argument('--password', type=str,
                         help='Mot de passe de la base de données (optionnel, utilisera la variable d\'environnement si non spécifié)')
     parser.add_argument('--timeout', type=int, default=10,
@@ -161,22 +157,31 @@ def main():
     # Créer le dossier de logs s'il n'existe pas
     os.makedirs('logs', exist_ok=True)
     
-    # Parser les arguments
-    args = parse_arguments()
-    
     # Charger les variables d'environnement depuis .env
     from dotenv import load_dotenv
     load_dotenv()
     
-    # Utiliser le mot de passe de l'argument ou de l'environnement
-    password = args.password or os.getenv('RDS_PASSWORD', 'm!wgz#$gsPD}d7x')
+    # Parser les arguments
+    args = parse_arguments()
+    
+    # Utiliser les valeurs des arguments ou des variables d'environnement
+    host = args.host or os.getenv('DB_HOST')
+    port = args.port or int(os.getenv('DB_PORT', '5432'))
+    dbname = args.dbname or os.getenv('DB_NAME')
+    user = args.user or os.getenv('DB_USER')
+    password = args.password or os.getenv('DB_PASSWORD')
+    
+    # Vérifier que tous les paramètres sont définis
+    if not all([host, dbname, user, password]):
+        logger.error("Paramètres de connexion incomplets. Veuillez définir les variables d'environnement ou fournir les arguments.")
+        sys.exit(1)
     
     # Tester la connexion
-    if test_connection(args.host, args.port, args.dbname, args.user, password, args.timeout):
+    if test_connection(host, port, dbname, user, password, args.timeout):
         # Créer les tables si demandé
         if args.create_tables:
             logger.info("Création des tables...")
-            if create_tables(args.host, args.port, args.dbname, args.user, password, args.timeout):
+            if create_tables(host, port, dbname, user, password, args.timeout):
                 logger.info("Tables créées ou mises à jour avec succès !")
             else:
                 logger.error("Échec de la création des tables.")
