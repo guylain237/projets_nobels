@@ -48,11 +48,11 @@ AWS_ACCESS_KEY = os.getenv('KEY_ACCESS')
 AWS_SECRET_KEY = os.getenv('KEY_SECRET')
 S3_BUCKET_NAME = os.getenv('data_lake_bucket', 'data-lake-brut')
 # Variables d'environnement pour RDS
-RDS_HOST = os.getenv('DB_HOST', 'datas.c32ygg4oyapa.eu-north-1.rds.amazonaws.com')
+RDS_HOST = os.getenv('DB_HOST')
 RDS_PORT = int(os.getenv('DB_PORT', '5432'))
-RDS_DBNAME = os.getenv('DB_NAME', 'postgres')
-RDS_USER = os.getenv('DB_USER', 'postgres')
-RDS_PASSWORD = os.getenv('DB_PASSWORD', 'm!wgz#$gsPD}d7x')
+RDS_DBNAME = os.getenv('DB_NAME')
+RDS_USER = os.getenv('DB_USER')
+RDS_PASSWORD = os.getenv('DB_PASSWORD')
 
 #
 # Fonctions pour AWS S3

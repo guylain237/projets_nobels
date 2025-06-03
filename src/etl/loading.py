@@ -83,10 +83,10 @@ def get_rds_connection():
     """
     try:
         # Récupérer les paramètres de connexion
-        host = os.getenv('DB_HOST', 'datas.c32ygg4oyapa.eu-north-1.rds.amazonaws.com')
+        host = os.getenv('DB_HOST')
         port = os.getenv('DB_PORT', '5432')
-        dbname = os.getenv('DB_NAME', 'postgres')
-        user = os.getenv('DB_USER', 'postgres')
+        dbname = os.getenv('DB_NAME')
+        user = os.getenv('DB_USER')
         password = os.getenv('DB_PASSWORD')
         
         # Établir la connexion
