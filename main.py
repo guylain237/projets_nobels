@@ -54,9 +54,9 @@ def check_aws_configuration():
     print("\nVérification de la configuration AWS avant de démarrer le pipeline...\n")
     
     try:
-        # Exécuter le script de vérification AWS en mode direct (pas de capture)
+        # Exécuter le script de déploiement d'infrastructure AWS en mode direct (pas de capture)
         # pour permettre l'affichage en temps réel
-        aws_check_script = os.path.join('scripts', 'verify_aws.py')
+        aws_check_script = os.path.join('scripts', 'utils', 'deploy_infrastructure_aws.py')
         
         if not os.path.exists(aws_check_script):
             logger.error(f"Script de vérification AWS non trouvé: {aws_check_script}")
