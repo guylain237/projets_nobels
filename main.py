@@ -3,24 +3,35 @@
 
 """
 Script principal pour exécuter le pipeline de collecte et d'analyse d'offres d'emploi.
+Vérifie d'abord la configuration AWS avant de démarrer le pipeline.
 """
 
 import os
 import sys
 import logging
 import argparse
+import subprocess
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Ajouter le répertoire parent au chemin Python
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Configuration du logging
+os.makedirs('logs', exist_ok=True)
+log_file = f"logs/pipeline_execution_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(f"logs/pipeline_execution_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"),
+        logging.FileHandler(log_file),
         logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
+
+# Charger les variables d'environnement
+load_dotenv()
 
 def parse_arguments():
     """Parse les arguments de ligne de commande."""
@@ -35,6 +46,40 @@ def parse_arguments():
     parser.add_argument('--no-rds', action='store_true', help='Ne pas utiliser RDS')
     return parser.parse_args()
 
+def check_aws_configuration():
+    """Vérifie la configuration AWS avant de démarrer le pipeline."""
+    logger.info("Vérification de la configuration AWS...")
+    
+    # Exécuter le script de vérification AWS directement
+    print("\nVérification de la configuration AWS avant de démarrer le pipeline...\n")
+    
+    try:
+        # Exécuter le script de vérification AWS en mode direct (pas de capture)
+        # pour permettre l'affichage en temps réel
+        aws_check_script = os.path.join('scripts', 'verify_aws.py')
+        
+        if not os.path.exists(aws_check_script):
+            logger.error(f"Script de vérification AWS non trouvé: {aws_check_script}")
+            print(f"❌ Script de vérification AWS non trouvé: {aws_check_script}")
+            return False
+        
+        logger.info(f"Exécution du script de vérification AWS: {aws_check_script}")
+        result = subprocess.run([sys.executable, aws_check_script])
+        
+        if result.returncode != 0:
+            logger.error(f"La vérification AWS a échoué avec le code de sortie {result.returncode}")
+            print("\n❌ La configuration AWS n'est pas correcte. Veuillez corriger les erreurs avant de continuer.")
+            return False
+        
+        logger.info("Vérification AWS réussie")
+        print("\n✅ La configuration AWS est correcte. Le pipeline peut démarrer.")
+        return True
+    
+    except Exception as e:
+        logger.error(f"Erreur lors de la vérification AWS: {e}")
+        print(f"\n❌ Erreur lors de la vérification AWS: {e}")
+        return False
+
 def main():
     """Fonction principale du pipeline."""
     # Créer les dossiers nécessaires
@@ -47,6 +92,11 @@ def main():
     
     # Parser les arguments
     args = parse_arguments()
+    
+    # Vérifier la configuration AWS avant de démarrer le pipeline
+    if not check_aws_configuration():
+        logger.error("La vérification de la configuration AWS a échoué. Arrêt du pipeline.")
+        return 1
     
     # Afficher les informations de configuration
     logger.info("Démarrage du pipeline de collecte et analyse d'offres d'emploi")
@@ -132,10 +182,12 @@ def main():
         logger.info("Étape 3: Analyse des données")
         from src.analysis.job_analysis import generate_report
         
-        # Générer le rapport d'analyse
+        # Générer le rapport d'analyses il se 
         generate_report()
     
-    logger.info("Pipeline terminé avec succès !")
+    logger.info(" Pipeline terminé avec succès ! ")
+    return 0
 
 if __name__ == "__main__":
-    main()
+    exit_code = main()
+    sys.exit(exit_code)
