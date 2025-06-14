@@ -43,9 +43,13 @@ def upload_to_s3(data, filename):
         if not aws_access_key or not aws_secret_key:
             print("\nErreur: Variables d'environnement AWS_ACCESS_KEY_ID ou AWS_SECRET_ACCESS_KEY manquantes")
             print("Tentative d'utilisation des valeurs par défaut...")
-            # Utilisation des valeurs par défaut stockées dans le projet
-            aws_access_key = "AKIAS2VS4EK2UIF56F5O"
-            aws_secret_key = "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"
+            # Charger les variables d'environnement depuis le fichier .env
+            from dotenv import load_dotenv
+            load_dotenv()
+            
+            # Utilisation des variables d'environnement
+            aws_access_key = os.getenv('KEY_ACCESS', '')
+            aws_secret_key = os.getenv('KEY_SECRET', '')
         
         print(f"\nTentative d'upload vers le bucket S3: {bucket_name}")
         print(f"Chemin du fichier S3: {filename}")

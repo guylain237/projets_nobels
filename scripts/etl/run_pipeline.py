@@ -66,15 +66,26 @@ def setup_environment():
     Configure les variables d'environnement nécessaires pour le pipeline ETL.
     """
     # Définir les variables d'environnement pour AWS et la base de données
-    os.environ['DB_HOST'] = 'datawarehouses.c32ygg4oyapa.eu-north-1.rds.amazonaws.com'
-    os.environ['DB_PORT'] = '5432'
-    os.environ['DB_NAME'] = 'datawarehouses'
-    os.environ['DB_USER'] = 'admin'
-    # Utiliser un mot de passe sans caractères spéciaux pour éviter les problèmes d'encodage
-    os.environ['DB_PASSWORD'] = 'mwgzgsPDd7x'  # Version simplifiée du mot de passe
-    os.environ['AWS_ACCESS_KEY_ID'] = 'AKIAS2VS4EK2UIF56F5O'
-    os.environ['AWS_SECRET_ACCESS_KEY'] = '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'
-    os.environ['S3_BUCKET'] = 'data-lake-brut'
+    os.environ['DB_HOST'] = os.getenv('DB_HOST')
+    os.environ['DB_PORT'] = os.getenv('DB_PORT')
+    os.environ['DB_NAME'] = os.getenv('DB_NAME')
+    os.environ['DB_USER'] = os.getenv('DB_USER')
+    os.environ['DB_PASSWORD'] = os.getenv('DB_PASSWORD')
+    os.environ['AWS_ACCESS_KEY_ID'] = os.getenv('AWS_ACCESS_KEY_ID')
+    os.environ['AWS_SECRET_ACCESS_KEY'] = os.getenv('AWS_SECRET_ACCESS_KEY')
+    os.environ['S3_BUCKET'] = os.getenv('S3_BUCKET')
+    # Charger les variables d'environnement depuis le fichier .env
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    # Utiliser les variables d'environnement du fichier .env
+    os.environ['DB_PORT'] = os.getenv('DB_PORT')
+    os.environ['DB_NAME'] = os.getenv('DB_NAME')
+    os.environ['DB_USER'] = os.getenv('DB_USER')
+    os.environ['DB_PASSWORD'] = os.getenv('DB_PASSWORD')
+    os.environ['AWS_ACCESS_KEY_ID'] = os.getenv('KEY_ACCESS')
+    os.environ['AWS_SECRET_ACCESS_KEY'] = os.getenv('KEY_SECRET')
+    os.environ['S3_BUCKET'] = os.getenv('DATA_LAKE_BUCKET')
     
     # Vérifier que les répertoires nécessaires existent
     dirs_to_check = [
