@@ -33,16 +33,24 @@ def setup_environment():
     """
     Configure les variables d'environnement nécessaires pour le pipeline ETL.
     """
-    # Définir les variables d'environnement pour AWS et la base de données
-    os.environ['DB_HOST'] = 'datawarehouses.c32ygg4oyapa.eu-north-1.rds.amazonaws.com'
-    os.environ['DB_PORT'] = '5432'
-    os.environ['DB_NAME'] = 'datawarehouses'
-    os.environ['DB_USER'] = 'admin'
-    # Utiliser un mot de passe sans caractères spéciaux pour éviter les problèmes d'encodage
-    os.environ['DB_PASSWORD'] = 'mwgzgsPDd7x'  # Version simplifiée du mot de passe
-    os.environ['AWS_ACCESS_KEY_ID'] = 'AKIAS2VS4EK2UIF56F5O'
-    os.environ['AWS_SECRET_ACCESS_KEY'] = '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'
-    os.environ['S3_BUCKET'] = 'data-lake-brut'
+    # Charger les variables d'environnement depuis le fichier .env
+    from etl.api.dotenv_utils import load_dotenv
+    load_dotenv()
+    
+    # Vérifier que les variables essentielles sont définies
+    required_vars = ['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD', 
+                     'KEY_ACCESS', 'KEY_SECRET', 'DATA_LAKE_BUCKET']
+    
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    if missing_vars:
+        logger.error(f"Variables d'environnement manquantes: {', '.join(missing_vars)}")
+        logger.error("Veuillez vérifier votre fichier .env")
+        return False
+    
+    # Mapper les variables AWS pour boto3
+    os.environ['AWS_ACCESS_KEY_ID'] = os.getenv('KEY_ACCESS')
+    os.environ['AWS_SECRET_ACCESS_KEY'] = os.getenv('KEY_SECRET')
+    os.environ['S3_BUCKET'] = os.getenv('DATA_LAKE_BUCKET')
     
     # Vérifier que les répertoires nécessaires existent
     dirs_to_check = ['data/raw/france_travail', 'data/intermediate', 'data/processed/pole_emploi', 'logs']
@@ -84,6 +92,8 @@ def parse_arguments():
                         help="Chemin vers un fichier CSV spécifique à utiliser comme source de données")
     parser.add_argument('--all-data', action='store_true',
                         help="Extraire toutes les données disponibles sans filtrage par date")
+    parser.add_argument('--force', action='store_true',
+                        help="Forcer l'exécution du pipeline même si les données sont déjà chargées")
     
     return parser.parse_args()
 
@@ -141,8 +151,17 @@ def main():
     # Configurer le niveau de log
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
+        logger.debug("Mode verbeux activé")
+        
+    # Vérifier si les données sont déjà chargées
+    if args.mode == 'full' or args.mode == 'load':
+        data_already_loaded, record_count = check_data_already_loaded()
+        if data_already_loaded and not args.force:
+            logger.info(f"Les données sont déjà chargées dans la base de données ({record_count} enregistrements)")
+            logger.info("Pour forcer l'exécution du pipeline, utilisez l'option --force")
+            logger.info("Pipeline ETL terminé (aucune action nécessaire)")
+            return 0
     
-    # Afficher le mode d'exécution
     logger.info(f"=== Démarrage du pipeline ETL en mode '{args.mode}' ===")
     if not args.all_data:
         logger.info(f"Période: {args.start_date} à {args.end_date}")

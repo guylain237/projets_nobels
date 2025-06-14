@@ -29,14 +29,21 @@ logger = logging.getLogger(__name__)
 
 def setup_environment():
     """Configure les variables d'environnement pour la connexion à la base de données."""
-    # Paramètres de connexion à la base de données
-    os.environ['DB_HOST'] = 'datas.c32ygg4oyapa.eu-north-1.rds.amazonaws.com'
-    os.environ['DB_PORT'] = '5432'
-    os.environ['DB_NAME'] = 'postgres'
-    os.environ['DB_USER'] = 'postgres'
-    os.environ['DB_PASSWORD'] = 'm!wgz#$gsPD}d7x'
+    # Charger les variables d'environnement depuis le fichier .env
+    from etl.api.dotenv_utils import load_dotenv
+    load_dotenv()
+    
+    # Vérifier que les variables essentielles sont définies
+    required_vars = ['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD']
+    
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    if missing_vars:
+        logger.error(f"Variables d'environnement manquantes: {', '.join(missing_vars)}")
+        logger.error("Veuillez vérifier votre fichier .env")
+        return False
     
     logger.info("Variables d'environnement configurées")
+    return True
 
 def get_db_connection():
     """
